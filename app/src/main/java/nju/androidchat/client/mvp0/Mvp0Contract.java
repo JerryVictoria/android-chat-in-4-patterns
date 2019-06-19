@@ -7,6 +7,8 @@ import nju.androidchat.client.ClientMessage;
 public interface Mvp0Contract {
     interface View extends BaseView<Presenter> {
         void showMessageList(List<ClientMessage> messages);
+        void showText(ClientMessage message);
+        void showImg(ClientMessage message);
     }
 
     interface Presenter extends BasePresenter {

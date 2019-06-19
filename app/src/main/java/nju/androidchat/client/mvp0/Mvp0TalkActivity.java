@@ -20,6 +20,8 @@ import lombok.extern.java.Log;
 import nju.androidchat.client.ClientMessage;
 import nju.androidchat.client.R;
 import nju.androidchat.client.Utils;
+import nju.androidchat.client.component.ItemImgReceive;
+import nju.androidchat.client.component.ItemImgSend;
 import nju.androidchat.client.component.ItemTextReceive;
 import nju.androidchat.client.component.ItemTextSend;
 import nju.androidchat.client.component.OnRecallMessageRequested;
@@ -27,6 +29,7 @@ import nju.androidchat.client.component.OnRecallMessageRequested;
 @Log
 public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.View, TextView.OnEditorActionListener, OnRecallMessageRequested {
     private Mvp0Contract.Presenter presenter;
+    private Mvp0Contract.Presenter img_presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +39,18 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
         Mvp0TalkModel mvp0TalkModel = new Mvp0TalkModel();
 
         // Create the presenter
-        this.presenter = new Mvp0TalkPresenter(mvp0TalkModel, this, new ArrayList<>());
+        ArrayList<ClientMessage> list= new ArrayList<>();
+        this.presenter = new Mvp0TalkPresenter(mvp0TalkModel, this, list);
         mvp0TalkModel.setIMvp0TalkPresenter(this.presenter);
+        this.img_presenter = new MVP0TalkImgPresenter(mvp0TalkModel, this, list);
+        mvp0TalkModel.setIMvp0ImgPresenter(this.img_presenter);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         presenter.start();
+        img_presenter.start();
     }
 
     @Override
@@ -51,18 +58,30 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
         runOnUiThread(() -> {
                     LinearLayout content = findViewById(R.id.chat_content);
 
-                    // 删除所有已有的ItemText
+                    // 删除所有已有的ItemText和ImageText
                     content.removeAllViews();
 
                     // 增加ItemText
                     for (ClientMessage message : messages) {
                         String text = String.format("%s", message.getMessage());
-                        // 如果是自己发的，增加ItemTextSend
-                        if (message.getSenderUsername().equals(this.presenter.getUsername())) {
-                            content.addView(new ItemTextSend(this, text, message.getMessageId(), this));
-                        } else {
-                            content.addView(new ItemTextReceive(this, text, message.getMessageId()));
+
+                        if(isMarkdownImg(text)){
+                            String url = text.substring(text.indexOf('[')+1,text.indexOf(']'));
+                            text = url;
+                            if (message.getSenderUsername().equals(this.presenter.getUsername())) {
+                                content.addView(new ItemImgSend(this, text, message.getMessageId(), this));
+                            } else {
+                                content.addView(new ItemImgReceive(this, text, message.getMessageId()));
+                            }
+                        }else{
+                            // 如果是自己发的，增加ItemTextSend
+                            if (message.getSenderUsername().equals(this.presenter.getUsername())) {
+                                content.addView(new ItemTextSend(this, text, message.getMessageId(), this));
+                            } else {
+                                content.addView(new ItemTextReceive(this, text, message.getMessageId()));
+                            }
                         }
+
                     }
 
                     Utils.scrollListToBottom(this);
@@ -71,8 +90,33 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
     }
 
     @Override
-    public void setPresenter(Mvp0Contract.Presenter presenter) {
-        this.presenter = presenter;
+    public void showText(ClientMessage message) {
+        runOnUiThread(() -> {
+            LinearLayout content = findViewById(R.id.chat_content);
+            String text = String.format("%s", message.getMessage());
+            if (message.getSenderUsername().equals(this.presenter.getUsername())) {
+                content.addView(new ItemTextSend(this, text, message.getMessageId(), this));
+            } else {
+                content.addView(new ItemTextReceive(this, text, message.getMessageId()));
+            }
+            Utils.scrollListToBottom(this);
+        });
+    }
+
+    @Override
+    public void showImg(ClientMessage message) {
+        runOnUiThread(() -> {
+            LinearLayout content = findViewById(R.id.chat_content);
+            String text = String.format("%s", message.getMessage());
+            String url = text.substring(text.indexOf('[')+1,text.indexOf(']'));
+            text = url;
+            if (message.getSenderUsername().equals(this.presenter.getUsername())) {
+                content.addView(new ItemImgSend(this, text, message.getMessageId(), this));
+            } else {
+                content.addView(new ItemImgReceive(this, text, message.getMessageId()));
+            }
+            Utils.scrollListToBottom(this);
+        });
     }
 
     @Override
@@ -101,7 +145,12 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
     private void sendText() {
         EditText text = findViewById(R.id.et_content);
         AsyncTask.execute(() -> {
-            this.presenter.sendMessage(text.getText().toString());
+            if(isMarkdownImg(text.getText().toString())){
+                this.img_presenter.sendMessage(text.getText().toString());
+            }else{
+                this.presenter.sendMessage(text.getText().toString());
+            }
+
         });
     }
 
@@ -114,5 +163,18 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
     @Override
     public void onRecallMessageRequested(UUID messageId) {
 
+    }
+
+    @Override
+    public void setPresenter(Mvp0Contract.Presenter presenter1, Mvp0Contract.Presenter presenter2) {
+        this.presenter = presenter1;
+        this.img_presenter = presenter2;
+    }
+
+    private boolean isMarkdownImg(String str){
+        if(str.contains("!(") && str.indexOf(')')>=str.indexOf('(') && str.indexOf('[')>str.indexOf(')') && str.indexOf(']')>str.indexOf('[')){
+            return true;
+        }
+        return false;
     }
 }

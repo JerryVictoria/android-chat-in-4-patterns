@@ -1,18 +1,22 @@
 package nju.androidchat.client.mvp0;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import nju.androidchat.client.ClientMessage;
 
+/**
+ * @Author: TJW
+ * @Date: 16:53 2019/6/12
+ * @Description
+ */
 @AllArgsConstructor
-public class Mvp0TalkPresenter implements Mvp0Contract.Presenter {
-
+public class MVP0TalkImgPresenter implements Mvp0Contract.Presenter {
     private Mvp0Contract.Model mvp0TalkModel;
     private Mvp0Contract.View iMvp0TalkView;
 
-    @Getter
     private List<ClientMessage> clientMessages;
 
     @Override
@@ -35,6 +39,10 @@ public class Mvp0TalkPresenter implements Mvp0Contract.Presenter {
         clientMessages.add(clientMessage);
         iMvp0TalkView.showMessageList(clientMessages);
     }
+    private void showNewMsg(ClientMessage clientMessage){
+        clientMessages.add(clientMessage);
+        iMvp0TalkView.showImg(clientMessage);
+    }
 
     //撤回消息，Mvp0暂不实现
     @Override
@@ -45,10 +53,5 @@ public class Mvp0TalkPresenter implements Mvp0Contract.Presenter {
     @Override
     public void start() {
 
-    }
-
-    private void showNewMsg(ClientMessage clientMessage){
-        clientMessages.add(clientMessage);
-        iMvp0TalkView.showText(clientMessage);
     }
 }
