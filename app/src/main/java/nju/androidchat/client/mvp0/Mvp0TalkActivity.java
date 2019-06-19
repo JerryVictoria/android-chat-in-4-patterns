@@ -66,7 +66,7 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
                         String text = String.format("%s", message.getMessage());
 
                         if(isMarkdownImg(text)){
-                            String url = text.substring(text.indexOf('[')+1,text.indexOf(']'));
+                            String url = text.substring(text.indexOf('(')+1,text.indexOf(')'));
                             text = url;
                             if (message.getSenderUsername().equals(this.presenter.getUsername())) {
                                 content.addView(new ItemImgSend(this, text, message.getMessageId(), this));
@@ -172,7 +172,7 @@ public class Mvp0TalkActivity extends AppCompatActivity implements Mvp0Contract.
     }
 
     private boolean isMarkdownImg(String str){
-        if(str.contains("!(") && str.indexOf(')')>=str.indexOf('(') && str.indexOf('[')>str.indexOf(')') && str.indexOf(']')>str.indexOf('[')){
+        if(str.contains("![") && str.indexOf(']')>=str.indexOf('[') && str.indexOf('(')>str.indexOf(']') && str.indexOf(')')>str.indexOf('(')){
             return true;
         }
         return false;
