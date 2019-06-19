@@ -24,8 +24,6 @@ public class Mvp0TalkModel implements MessageListener, Mvp0Contract.Model {
 
     @Setter
     private Mvp0Contract.Presenter iMvp0TalkPresenter;
-    @Setter
-    private Mvp0Contract.Presenter iMvp0ImgPresenter;
 
     public Mvp0TalkModel() {
         this.client = SocketClient.getClient();

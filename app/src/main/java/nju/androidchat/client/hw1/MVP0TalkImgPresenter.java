@@ -1,8 +1,6 @@
-package nju.androidchat.client.mvp0;
+package nju.androidchat.client.hw1;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import nju.androidchat.client.ClientMessage;

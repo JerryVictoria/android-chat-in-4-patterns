@@ -18,7 +18,7 @@ public class Mvp0TalkPresenter implements Mvp0Contract.Presenter {
     @Override
     public void sendMessage(String content) {
         ClientMessage clientMessage = mvp0TalkModel.sendInformation(content);
-        showNewMsg(clientMessage);
+        refreshMessageList(clientMessage);
     }
 
     @Override
@@ -45,10 +45,5 @@ public class Mvp0TalkPresenter implements Mvp0Contract.Presenter {
     @Override
     public void start() {
 
-    }
-
-    private void showNewMsg(ClientMessage clientMessage){
-        clientMessages.add(clientMessage);
-        iMvp0TalkView.showText(clientMessage);
     }
 }
